@@ -1,0 +1,32 @@
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: white;
+    padding-top: 70px;
+}
+
+canvas {
+    background: white;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.navbar-brand {
+    padding-top: 10px;
+}
+
+.chart-container {
+    padding: 1px;
+}
+
+#datePicker {
+    min-width: 26rem;
+}
+
+#analyseBtn {
+    margin-left: 1rem;
+}
