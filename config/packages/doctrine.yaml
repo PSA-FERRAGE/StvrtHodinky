@@ -25,7 +25,7 @@ doctrine:
             mydatetime: App\Type\MyDateTimeType
 
     orm:
-        default_entity_manager: sapia
+        default_entity_manager: fer
         auto_generate_proxy_classes: '%kernel.debug%'
         entity_managers:
             sapia:

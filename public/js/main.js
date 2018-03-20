@@ -33,7 +33,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: "POST",
-            url: "/dopravnik/" + linka,
+            url: "/stvrthodinky/" + linka,
             data: {
                 start: startTime,
                 end: endTime
@@ -41,106 +41,235 @@ $(document).ready(function () {
             success: function (data) {
                 if (data.success) {
                     $(".chartsDiv").empty();
-                    data.Dopravniky.forEach(function (value, index) {
-                        $(".chartsDiv").append("<div class=\"row\">\n" +
-                            "                    <div class=\"col-sm-1\">\n" +
-                            "                        <input type=\"checkbox\" aria-label=\"...\">" +
-                            "                    </div>\n" +
-                            "                    <div class=\"col-sm-11 chart-container\" style=\"position: relative; height:40vh; width:100vw\">\n" +
-                            "                        <canvas id=\"" + value.nazov + "\"></canvas>\n" +
-                            "                    </div>\n" +
-                            "                </div>");
+                    $(".chartsDiv").append("<div class=\"row\">\n" +
+                        "                    <div class=\"col-sm-1\">\n" +
+                        "                        <input type=\"checkbox\" aria-label=\"...\">" +
+                        "                    </div>\n" +
+                        "                    <div class=\"col-sm-11 chart-container\" style=\"position: relative; height:40vh; width:100vw\">\n" +
+                        "                        <canvas id=\"" + data.nazov + "\"></canvas>\n" +
+                        "                    </div>\n" +
+                        "                </div>");
 
-                        // Create the chart.js data structure using 'labels' and 'data'
-                        var tempData = {
-                            labels: value.data.labels,
-                            datasets: [{
-                                label: "Pocet ks",
-                                fill: false,
-                                borderColor: '#337ab7',
-                                borderWidth: 2,
-                                lineTension: 0,
-                                data: value.data.values
-                            }, {
-                                label: "Minimum",
-                                fill: false,
-                                borderColor: 'red',
-                                borderWidth: 1,
-                                lineTension: 0,
-                                data: value.minVals
-                            }, {
-                                label: "Ok",
-                                fill: false,
-                                borderColor: 'green',
-                                borderWidth: 1,
-                                lineTension: 0,
-                                data: value.okVals
-                            }]
-                        };
-
-                        var ctx = $("#" + value.nazov);
-                        var myLineChart = new Chart(ctx, {
+                    console.log(data.data);
+                    var tempData = {
+                        labels: data.data.labels,
+                        datasets: [{
+                            label: "Vyrobené ks",
+                            backgroundColor: "rgba(54, 162, 235, 0.2)",
+                            borderColor: "rgb(54, 162, 235)",
+                            borderWidth: 1,
+                            lineTension: 0,
+                            data: data.data.values,
+                            datalabels: {
+                                align: 'top',
+                                anchor: 'start'
+                            }
+                        }, {
                             type: 'line',
-                            data: tempData,
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                title: {
-                                    display: true,
-                                    text: value.nazov
-                                },
-                                legend: {
-                                    display: false
-                                },
-                                tooltips: {
-                                    callbacks: {
-                                        title: function (tooltipItems, data) {
-                                            var dateTime = moment(tooltipItems[0].xLabel);
-                                            return dateTime.format('DD/MM/YYYY HH:mm');
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    xAxes: [{
-                                        type: 'time',
-                                        time: {
-                                            displayFormats: {
-                                                'millisecond': 'DD/MM/YYYY HH:mm',
-                                                'second': 'DD/MM/YYYY HH:mm',
-                                                'minute': 'DD/MM/YYYY HH:mm',
-                                                'hour': 'DD/MM/YYYY HH:mm',
-                                                'day': 'DD/MM/YYYY HH:mm',
-                                                'week': 'DD/MM/YYYY HH:mm',
-                                                'month': 'DD/MM/YYYY HH:mm',
-                                                'quarter': 'DD/MM/YYYY HH:mm',
-                                                'year': 'DD/MM/YYYY HH:mm'
-                                            }
-                                        },
-                                        gridLines: {
-                                            drawOnChartArea: false
-                                        }
-                                    }],
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true,
-                                            max: (value.Maximum + 3)
-                                        },
-                                        gridLines: {
-                                            drawOnChartArea: false
-                                        }
-                                    }]
-                                },
-                                elements: {
-                                    point: {
-                                        radius: 0
+                            label: "Minimum",
+                            fill: false,
+                            borderColor: 'red',
+                            borderWidth: 2,
+                            lineTension: 0,
+                            data: data.data.limit,
+                            datalabels: {
+                                display: false
+                            }
+                        }]
+                    };
+
+                    var ctx = $("#" + data.nazov);
+                    var myBarChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: tempData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                              title: {
+                                display: true,
+                                text: data.nazov
+                            },
+                            legend: {
+                                display: false
+                            },
+                            tooltips: {
+                                callbacks: {
+                                    title: function (tooltipItems, data) {
+                                        var dateTime = moment(tooltipItems[0].xLabel);
+                                        return dateTime.format('DD/MM/YYYY HH:mm');
                                     }
                                 }
+                            },
+                            scales: {
+                                xAxes: [{
+                                    type: 'time',
+                                    distribution: 'linear',
+                                    offset: true,
+                                    bounds: 'ticks',
+                                    time: {
+                                        unit: 'minute',
+                                        stepSize: 15,
+                                        displayFormats: {
+                                            'minute': 'HH:mm'
+                                        }
+                                    },
+                                    gridLines: {
+                                        drawOnChartArea: false
+                                    }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true,
+                                        max: (data.data.Maximum + 3)
+                                    },
+                                    gridLines: {
+                                        drawOnChartArea: false
+                                    }
+                                }]
+                            },
+                            elements: {
+                                point: {
+                                    radius: 0
+                                }
+                            },
+                            plugins: {
+                                datalabels: {
+                                    color: 'black',
+                                    display: function(context) {
+                                        return context.dataset.data[context.dataIndex] > 0;
+                                    },
+                                    font: {
+                                        weight: 'bold'
+                                    },
+                                    formatter: Math.round
+                                }
                             }
-                        });
+                        }
                     });
                 }
             },
             dataType: "json"
         });
     });
+
+    // $('#analyseBtn').click(function () {
+    //     $(this).blur();
+    //
+    //     var linka = $('#linkaSelect').val();
+    //     var drp = $('#datePicker').data('daterangepicker');
+    //     var startTime = drp.startDate.format('DD/MM/YYYY HH:mm');
+    //     var endTime = drp.endDate.format('DD/MM/YYYY HH:mm');
+    //
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "/dopravnik/" + linka,
+    //         data: {
+    //             start: startTime,
+    //             end: endTime
+    //         },
+    //         success: function (data) {
+    //             if (data.success) {
+    //                 $(".chartsDiv").empty();
+    //                 data.Dopravniky.forEach(function (value, index) {
+    //                     $(".chartsDiv").append("<div class=\"row\">\n" +
+    //                         "                    <div class=\"col-sm-1\">\n" +
+    //                         "                        <input type=\"checkbox\" aria-label=\"...\">" +
+    //                         "                    </div>\n" +
+    //                         "                    <div class=\"col-sm-11 chart-container\" style=\"position: relative; height:40vh; width:100vw\">\n" +
+    //                         "                        <canvas id=\"" + value.nazov + "\"></canvas>\n" +
+    //                         "                    </div>\n" +
+    //                         "                </div>");
+    //
+    //                     // Create the chart.js data structure using 'labels' and 'data'
+    //                     var tempData = {
+    //                         labels: value.data.labels,
+    //                         datasets: [{
+    //                             label: "Pocet ks",
+    //                             fill: false,
+    //                             borderColor: '#337ab7',
+    //                             borderWidth: 2,
+    //                             lineTension: 0,
+    //                             data: value.data.values
+    //                         }, {
+    //                             label: "Minimum",
+    //                             fill: false,
+    //                             borderColor: 'red',
+    //                             borderWidth: 1,
+    //                             lineTension: 0,
+    //                             data: value.minVals
+    //                         }, {
+    //                             label: "Ok",
+    //                             fill: false,
+    //                             borderColor: 'green',
+    //                             borderWidth: 1,
+    //                             lineTension: 0,
+    //                             data: value.okVals
+    //                         }]
+    //                     };
+    //
+    //                     var ctx = $("#" + value.nazov);
+    //                     var myLineChart = new Chart(ctx, {
+    //                         type: 'line',
+    //                         data: tempData,
+    //                         options: {
+    //                             responsive: true,
+    //                             maintainAspectRatio: false,
+    //                             title: {
+    //                                 display: true,
+    //                                 text: value.nazov
+    //                             },
+    //                             legend: {
+    //                                 display: false
+    //                             },
+    //                             tooltips: {
+    //                                 callbacks: {
+    //                                     title: function (tooltipItems, data) {
+    //                                         var dateTime = moment(tooltipItems[0].xLabel);
+    //                                         return dateTime.format('DD/MM/YYYY HH:mm');
+    //                                     }
+    //                                 }
+    //                             },
+    //                             scales: {
+    //                                 xAxes: [{
+    //                                     type: 'time',
+    //                                     time: {
+    //                                         displayFormats: {
+    //                                             'millisecond': 'DD/MM/YYYY HH:mm',
+    //                                             'second': 'DD/MM/YYYY HH:mm',
+    //                                             'minute': 'DD/MM/YYYY HH:mm',
+    //                                             'hour': 'DD/MM/YYYY HH:mm',
+    //                                             'day': 'DD/MM/YYYY HH:mm',
+    //                                             'week': 'DD/MM/YYYY HH:mm',
+    //                                             'month': 'DD/MM/YYYY HH:mm',
+    //                                             'quarter': 'DD/MM/YYYY HH:mm',
+    //                                             'year': 'DD/MM/YYYY HH:mm'
+    //                                         }
+    //                                     },
+    //                                     gridLines: {
+    //                                         drawOnChartArea: false
+    //                                     }
+    //                                 }],
+    //                                 yAxes: [{
+    //                                     ticks: {
+    //                                         beginAtZero: true,
+    //                                         max: (value.Maximum + 3)
+    //                                     },
+    //                                     gridLines: {
+    //                                         drawOnChartArea: false
+    //                                     }
+    //                                 }]
+    //                             },
+    //                             elements: {
+    //                                 point: {
+    //                                     radius: 0
+    //                                 }
+    //                             }
+    //                         }
+    //                     });
+    //                 });
+    //             }
+    //         },
+    //         dataType: "json"
+    //     });
+    // });
 });

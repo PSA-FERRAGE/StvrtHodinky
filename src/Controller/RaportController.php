@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Fer\Dopravnik;
+use App\Entity\Fer\Linka;
 use App\Entity\Sapia\SSCQT09;
 use DateInterval;
 use DatePeriod;
@@ -11,26 +12,25 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class DopravnikController extends Controller
+class RaportController extends Controller
 {
     /**
      * @Route(path="/dopravnik/{linka}", name="dopravnik_action")
+     *
      * @param Request $request
+     * @param Linka   $linka
      *
      * @return JsonResponse
      */
-    public function getDataAction(Request $request, $linka)
+    public function getDopravnikDataAction(Request $request, Linka $linka)
     {
         $result = ['success' => false, 'msg' => ''];
 
-        $sapiaEm = $this->getDoctrine()->getManager();
-        $ferEm   = $this->getDoctrine()->getManager('fer');
+        $sapiaEm = $this->getDoctrine()->getManager('sapia');
 
         $params = $request->request;
         $start  = \DateTime::createFromFormat('d/m/Y H:i', $params->get('start', null));
         $end    = \DateTime::createFromFormat('d/m/Y H:i', $params->get('end', null));
-
-        $linka = $ferEm->getRepository('Fer:Linka')->find($linka);
 
         if (!$start || !$end) {
             $result['msg'] = 'Zle zadany datum!';
@@ -59,7 +59,7 @@ class DopravnikController extends Controller
             ];
 
             $data = $sapiaEm->getRepository(SSCQT09::class)
-                            ->findAllBetweenDates($start, $end, $dopravnik->getNazov());
+                            ->findAllConvDataBetweenDates($start, $end, $dopravnik->getNazov());
 
             if ($data) {
                 $resVals                = $this->fillEmtpyTimeValues($start, $end, $data);
@@ -107,6 +107,83 @@ class DopravnikController extends Controller
 
             $values[$i] = $lasVal;
             $i++;
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    /**
+     * @Route(path="/stvrthodinky/{linka}")
+     *
+     * @param Request $request
+     * @param Linka   $linka
+     *
+     * @return JsonResponse
+     */
+    public function getStvrthodinkyDataAction(Request $request, Linka $linka)
+    {
+        $result = ['success' => false, 'msg' => ''];
+
+        $sapiaEm = $this->getDoctrine()->getManager('sapia');
+
+        $params = $request->request;
+        $start  = \DateTime::createFromFormat('d/m/Y H:i', $params->get('start', null));
+        $end    = \DateTime::createFromFormat('d/m/Y H:i', $params->get('end', null));
+
+        if (!$start || !$end) {
+            $result['msg'] = 'Zle zadany datum!';
+
+            return new JsonResponse($result);
+        } else {
+            if (!$linka) {
+                $result['msg'] = 'Zle zadana linka!';
+
+                return new JsonResponse($result);
+            }
+        }
+
+        $pocitadla = $linka->getPocitadla();
+        $data      = $sapiaEm->getRepository(SSCQT09::class)
+                             ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla);
+        $resData   = $this->extractStvrthodinky($start, $end, $data);
+
+        $result['nazov']           = $linka->getNazov();
+        $result['data']            = $resData;
+        $result['data']['limit']   = array_fill(0, count($resData['values']), $linka->getLimitStvrthodinky());
+        $result['data']['Maximum'] = max($resData['values']);
+        $result['success']         = true;
+
+        return new JsonResponse($result);
+    }
+
+    private function extractStvrthodinky(\DateTime $start, \DateTime $end, array $data): array
+    {
+        $interval = new DateInterval('PT15M');
+        $period   = new DatePeriod($start, $interval, $end);
+        $values   = [];
+        $labels   = [];
+
+        /** @var \DateTime $dt */
+        foreach ($period as $dt) {
+            $labels[]   = $dt->format('Y-m-d H:i');
+            $cnt        = 0;
+            $secondTime = clone $dt;
+            $secondTime->add(new DateInterval('PT15M'));
+
+            /** @var SSCQT09 $zaznam */
+            foreach ($data as $zaznam) {
+                $tmpDateTime = new \DateTime($zaznam->getDEBEVT()->format('Y-m-d H:i:s'));
+
+                if ($tmpDateTime >= $dt && $tmpDateTime < $secondTime) {
+                    $cnt += 1;
+                } else {
+                    if ($tmpDateTime >= $secondTime) {
+                        break;
+                    }
+                }
+            }
+
+            $values[] = $cnt;
         }
 
         return ['labels' => $labels, 'values' => $values];

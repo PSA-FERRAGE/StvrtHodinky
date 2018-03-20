@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Fer\Linka;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -13,10 +14,9 @@ class DefaultController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function indexAction()
+    public function indexAction(EntityManagerInterface $em)
     {
-        $ferEm = $this->getDoctrine()->getManager('fer');
-        $linky = $ferEm->getRepository(Linka::class)->findAll();
+        $linky = $em->getRepository(Linka::class)->findAll();
 
         return $this->render('default/default.html.twig', ['linky' => $linky]);
     }

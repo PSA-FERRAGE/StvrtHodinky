@@ -29,6 +29,20 @@ class Linka
     private $nazov;
 
     /**
+     * @ORM\Column(type="simple_array")
+     *
+     * @var array
+     */
+    private $pocitadla;
+
+    /**
+     * @ORM\Column(type="integer")
+     *
+     * @var integer
+     */
+    private $limit_stvrthodinky;
+
+    /**
      * @ORM\OneToMany(targetEntity="App\Entity\Fer\Dopravnik", mappedBy="linka")
      *
      * @var ArrayCollection
@@ -68,5 +82,25 @@ class Linka
     public function getDopravniky(): Collection
     {
         return $this->dopravniky;
+    }
+
+    /**
+     * Get pocitadla
+     *
+     * @return array
+     */
+    public function getPocitadla(): array
+    {
+        return $this->pocitadla;
+    }
+
+    /**
+     * Get limit_stvrthodinky
+     *
+     * @return int
+     */
+    public function getLimitStvrthodinky(): int
+    {
+        return $this->limit_stvrthodinky;
     }
 }
