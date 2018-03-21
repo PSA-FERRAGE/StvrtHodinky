@@ -49,6 +49,13 @@ class Dopravnik
     private $ok_cnt;
 
     /**
+     * @ORM\Column(type="integer")
+     *
+     * @var integer
+     */
+    private $max;
+
+    /**
      * Get id
      *
      * @return int
@@ -96,5 +103,15 @@ class Dopravnik
     public function getOkCnt(): int
     {
         return $this->ok_cnt;
+    }
+
+    /**
+     * Get max
+     *
+     * @return int
+     */
+    public function getMax(): int
+    {
+        return $this->max;
     }
 }

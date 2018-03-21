@@ -6,12 +6,13 @@ use App\Type\MyDateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Sapia\SSCQT09Repository")
- * @ORM\Table(name="SSC99_M1.SSCQT09")
+ * @ORM\Entity(repositoryClass="App\Repository\Sapia\SSCQT05Repository")
+ * @ORM\Table(name="SSC99_M1.SSCQT05")
  */
-class SSCQT09
+class SSCQT05
 {
     /**
+     * @ORM\Id()
      * @ORM\Column(type="string", length=20)
      *
      * @var string
@@ -32,14 +33,7 @@ class SSCQT09
      *
      * @var MyDateTime
      */
-    private $DEB_EVT;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     *
-     * @var integer
-     */
-    private $VAL_CPT;
+    private $FIN_EVT;
 
     /**
      * Get ID_LOC
@@ -62,23 +56,13 @@ class SSCQT09
     }
 
     /**
-     * Get DEB_EVT
+     * Get FIN_EVT
      *
      * @return MyDateTime
      */
-    public function getDEBEVT(): MyDateTime
+    public function getFINEVT(): MyDateTime
     {
-        return $this->DEB_EVT;
-    }
-
-    /**
-     * Get VAL_CPT
-     *
-     * @return int
-     */
-    public function getVALCPT(): int
-    {
-        return $this->VAL_CPT;
+        return $this->FIN_EVT;
     }
 
     /**
@@ -86,6 +70,6 @@ class SSCQT09
      */
     public function getTime(): MyDateTime
     {
-        return $this->DEB_EVT;
+        return $this->FIN_EVT;
     }
 }

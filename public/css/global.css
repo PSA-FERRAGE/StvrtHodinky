@@ -21,6 +21,7 @@ canvas {
 
 .chart-container {
     padding: 1px;
+    margin-bottom: 1rem;
 }
 
 #datePicker {
@@ -29,4 +30,14 @@ canvas {
 
 #analyseBtn {
     margin-left: 1rem;
+}
+
+.infoPanel {
+    position: absolute;
+    left: 3rem;
+    overflow: hidden;
+}
+
+.infoPanelSpan {
+    padding-left: 1rem;
 }

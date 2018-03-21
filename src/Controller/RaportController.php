@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Fer\Dopravnik;
 use App\Entity\Fer\Linka;
+use App\Entity\Sapia\SSCQT05;
 use App\Entity\Sapia\SSCQT09;
 use DateInterval;
 use DatePeriod;
@@ -66,7 +67,9 @@ class RaportController extends Controller
                 $tmpRes['data']         = $resVals;
                 $tmpRes['minVals']      = array_fill(0, count($resVals['values']), $dopravnik->getMinCnt());
                 $tmpRes['okVals']       = array_fill(0, count($resVals['values']), $dopravnik->getOkCnt());
+                $tmpRes['MaximumAxis']  = $dopravnik->getMax();
                 $tmpRes['Maximum']      = max($resVals['values']);
+                $tmpRes['Minimum']      = min($resVals['values']);
                 $result['Dopravniky'][] = $tmpRes;
             }
         }
@@ -143,15 +146,39 @@ class RaportController extends Controller
         }
 
         $pocitadla = $linka->getPocitadla();
-        $data      = $sapiaEm->getRepository(SSCQT09::class)
-                             ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla);
-        $resData   = $this->extractStvrthodinky($start, $end, $data);
 
-        $result['nazov']           = $linka->getNazov();
-        $result['data']            = $resData;
-        $result['data']['limit']   = array_fill(0, count($resData['values']), $linka->getLimitStvrthodinky());
-        $result['data']['Maximum'] = max($resData['values']);
-        $result['success']         = true;
+        $data = $linka->getIdLoc() == null ? $sapiaEm->getRepository(SSCQT09::class)
+                                                     ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla) :
+                                             $sapiaEm->getRepository(SSCQT05::class)
+                                                     ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla, $linka->getIdLoc());
+
+        $resData = $this->extractStvrthodinky($start, $end, $data);
+
+        $result['nazov']                = $linka->getNazov();
+        $result['data']                 = $resData;
+        $result['data']['limit']        = array_fill(
+            0,
+            count($resData['values']),
+            $linka->getLimitStvrthodinky()
+        );
+        $result['data']['Maximum']      = max($resData['values']);
+        $result['data']['Production']   = array_sum($resData['values']);
+        $result['data']['Stvrthodinky'] = array_reduce(
+            $resData['values'],
+            function ($a, $b) use ($linka) {
+                return ($b >= $linka->getLimitStvrthodinky()) ? ++$a : $a;
+            }
+        );
+
+        if (!$result['data']['Stvrthodinky']) {
+            $result['data']['Stvrthodinky']     = 0;
+            $result['data']['StvrthodinkyPerc'] = 0;
+        } else {
+            $result['data']['StvrthodinkyPerc'] = $result['data']['Stvrthodinky'] / count($resData['values']);
+            $result['data']['StvrthodinkyPerc'] = round($result['data']['StvrthodinkyPerc'] * 100, 1);
+        }
+
+        $result['success'] = true;
 
         return new JsonResponse($result);
     }
@@ -170,9 +197,8 @@ class RaportController extends Controller
             $secondTime = clone $dt;
             $secondTime->add(new DateInterval('PT15M'));
 
-            /** @var SSCQT09 $zaznam */
             foreach ($data as $zaznam) {
-                $tmpDateTime = new \DateTime($zaznam->getDEBEVT()->format('Y-m-d H:i:s'));
+                $tmpDateTime = new \DateTime($zaznam->getTime()->format('Y-m-d H:i:s'));
 
                 if ($tmpDateTime >= $dt && $tmpDateTime < $secondTime) {
                     $cnt += 1;

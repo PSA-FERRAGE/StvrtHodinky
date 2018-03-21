@@ -4,10 +4,8 @@ namespace App\Repository\Sapia;
 
 use App\Entity\Sapia\SSCQT09;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
-use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**

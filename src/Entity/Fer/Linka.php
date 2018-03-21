@@ -49,6 +49,13 @@ class Linka
      */
     private $dopravniky;
 
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     *
+     * @var string
+     */
+    private $id_loc;
+
     public function __construct()
     {
         $this->dopravniky = new ArrayCollection();
@@ -102,5 +109,15 @@ class Linka
     public function getLimitStvrthodinky(): int
     {
         return $this->limit_stvrthodinky;
+    }
+
+    /**
+     * Get id_loc
+     *
+     * @return string|null
+     */
+    public function getIdLoc(): ?string
+    {
+        return $this->id_loc;
     }
 }

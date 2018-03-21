@@ -21,20 +21,28 @@
                     <div class="form-group" style="margin-left: 1rem;">
                         <input id="datePicker" type="text" class="form-control">
                     </div>
-                    <button id="analyseBtn" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Analyzovať</button>
+                    <button id="analyseBtn" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>
+                        Analyzovať
+                    </button>
                 </div>
 
                 <div class="navbar-form navbar-right">
-                    <button id="exportBtn" class="btn btn-success"><span class="glyphicon glyphicon-export"></span> Export</button>
+                    <button id="exportBtn" class="btn btn-success disabled"><span class="glyphicon glyphicon-export"></span>
+                        Export
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
     <main>
-        <div class="container-fluid">
-            <div class="chartsDiv">
+        <div id="preloader" style="display: none;">
+            <div class="loader">
+                <div class="inner one"></div>
+                <div class="inner two"></div>
+                <div class="inner three"></div>
             </div>
         </div>
+        <div id="mainArea" class="container-fluid"></div>
     </main>
 {% endblock %}
 
