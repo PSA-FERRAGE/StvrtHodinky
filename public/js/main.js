@@ -1,11 +1,10 @@
 $(document).ready(function () {
     $('#datePicker').daterangepicker({
-        timePicker: true,
-        timePicker24Hour: true,
+        autoUpdateInput: false,
+        timePicker: false,
         showWeekNumbers: true,
         showISOWeekNumbers: true,
-        showCustomRangeLabel: false,
-        alwaysShowCalendars: true,
+        singleDatePicker: true,
         locale: {
             format: 'DD/MM/YYYY HH:mm',
             weekLabel: "T",
@@ -15,13 +14,58 @@ $(document).ready(function () {
             monthNames: ["Január", "Február", "Marec", "Apríl", "Máj", "Jún",
                 "Júl", "August", "September", "Október", "November", "December"
             ]
-        },
-        ranges: {
-            'Ranná': [moment().startOf('hour').set('hour', 6), moment().startOf('hour').set('hour', 14)],
-            'Poobedná': [moment().startOf('hour').set('hour', 14), moment().startOf('hour').set('hour', 22)],
-            'Nočná': [moment().startOf('hour').set('hour', 22), moment().add(1, 'd').startOf('hour').set('hour', 6)]
         }
     });
+
+    $('#datePicker').on('apply.daterangepicker', function(ev, picker) {
+        changeDateTime();
+    });
+
+    $('.zmenaBtn').click(function () {
+        $('.zmenaBtn').removeClass('active').removeClass('btn-primary');
+        $(this).addClass('active').addClass('btn-primary');
+        $(this).blur();
+
+        if ($('#datePicker').val() !== '') {
+            changeDateTime();
+        }
+    });
+
+    function changeDateTime() {
+        var drp = $('#datePicker').data('daterangepicker');
+        var zmena = $('button.zmenaBtn.active').data('zmena');
+
+        if (zmena === null) {
+            alert("Prosim zvolte zmenu.");
+            return;
+        }
+
+        var datum = drp.startDate.format('DD/MM/YYYY');
+        var start, end;
+
+        switch (zmena) {
+            case "R":
+                start = moment(datum + " 06:00", "DD/MM/YYYY HH:mm");
+                end = moment(datum + " 14:00", "DD/MM/YYYY HH:mm");
+                break;
+            case "P":
+                start = moment(datum + " 14:00", "DD/MM/YYYY HH:mm");
+                end = moment(datum + " 22:00", "DD/MM/YYYY HH:mm");
+                break;
+            case "N":
+                start = moment(datum + " 22:00", "DD/MM/YYYY HH:mm");
+                end = moment(datum, "DD/MM/YYYY");
+                end.add(1, 'd').add(6, 'h');
+                break;
+            default:
+                return;
+        }
+
+        drp.setStartDate(start);
+        drp.setEndDate(end);
+
+        $('#datePicker').val(start.format('DD/MM/YYYY HH:mm') + ' - ' + end.format('DD/MM/YYYY HH:mm'));
+    }
 
     $('#analyseBtn').click(function () {
         $(this).blur();
