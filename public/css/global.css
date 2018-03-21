@@ -28,6 +28,10 @@ canvas {
     min-width: 26rem;
 }
 
+#datePicker::-ms-clear {
+    display: none;
+}
+
 #analyseBtn {
     margin-left: 1rem;
 }
