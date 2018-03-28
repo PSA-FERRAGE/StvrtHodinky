@@ -29,9 +29,7 @@
                         </div>
 
                     </div>
-                    <button id="analyseBtn" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>
-                        Analyzovať
-                    </button>
+                    <button id="analyseBtn" class="btn btn-primary disabled"><span class="glyphicon glyphicon-search"></span> Analyzovať</button>
                 </div>
 
                 <div class="navbar-form navbar-right">
@@ -50,7 +48,11 @@
                 <div class="inner three"></div>
             </div>
         </div>
-        <div id="mainArea" class="container-fluid"></div>
+        <div id="mainArea" class="container-fluid">
+            <div id="alert" class="alert alert-danger" role="alert" style="display: none;">
+                <strong>Pozor!</strong> <span id="alertText"></span>
+            </div>
+        </div>
     </main>
 {% endblock %}
 

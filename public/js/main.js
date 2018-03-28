@@ -18,13 +18,24 @@ $(document).ready(function () {
     });
 
     $('#datePicker').on('apply.daterangepicker', function(ev, picker) {
-        changeDateTime();
+        if ($('.zmenaBtn').hasClass('active') === true) {
+            changeDateTime();
+
+            $('#analyseBtn').removeClass('disabled');
+            $('#alert').hide();
+        } else {
+            $('#alertText').text('Prosim zvoľte zmenu [R, P, N].');
+            $('#alert').show();
+            return;
+        }
     });
 
     $('.zmenaBtn').click(function () {
         $('.zmenaBtn').removeClass('active').removeClass('btn-primary');
         $(this).addClass('active').addClass('btn-primary');
         $(this).blur();
+
+        $('#alert').hide();
 
         if ($('#datePicker').val() !== '') {
             changeDateTime();
@@ -34,12 +45,6 @@ $(document).ready(function () {
     function changeDateTime() {
         var drp = $('#datePicker').data('daterangepicker');
         var zmena = $('button.zmenaBtn.active').data('zmena');
-
-        if (zmena === null) {
-            alert("Prosim zvolte zmenu.");
-            return;
-        }
-
         var datum = drp.startDate.format('DD/MM/YYYY');
         var start, end;
 
@@ -69,6 +74,20 @@ $(document).ready(function () {
 
     $('#analyseBtn').click(function () {
         $(this).blur();
+
+        if ($(this).hasClass('disabled')) {
+            return;
+        }
+        
+        if ($('.zmenaBtn').hasClass('active') === false) {
+            $('#alertText').text('Prosim zvoľte zmenu [R, P, N].');
+            $('#alert').show();
+            return;
+        } else if ($('#datePicker').val() === '') {
+            $('#alertText').text('Prosim zvoľte dátum');
+            $('#alert').show();
+            return;
+        }
 
         var linka = $('#linkaSelect').val();
         var drp = $('#datePicker').data('daterangepicker');

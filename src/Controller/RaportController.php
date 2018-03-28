@@ -9,6 +9,7 @@ use App\Entity\Sapia\SSCQT09;
 use DateInterval;
 use DatePeriod;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,7 @@ class RaportController extends Controller
 {
     /**
      * @Route(path="/dopravnik/{linka}", name="dopravnik_action")
+     * @Method("POST")
      *
      * @param Request $request
      * @param Linka   $linka
@@ -117,6 +119,7 @@ class RaportController extends Controller
 
     /**
      * @Route(path="/stvrthodinky/{linka}")
+     * @Method("POST")
      *
      * @param Request $request
      * @param Linka   $linka
