@@ -25,7 +25,7 @@ canvas {
 }
 
 #datePicker {
-    min-width: 26rem;
+    min-width: 27rem;
 }
 
 #datePicker::-ms-clear {
