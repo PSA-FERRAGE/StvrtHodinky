@@ -1,5 +1,77 @@
 $(document).ready(function () {
+    window.onbeforeprint = function() {
+        console.log('This will be called before the user prints.');
+    };
+    window.onafterprint = function() {
+        console.log('This will be called after the user prints');
+    };
+
     var chartsArr = [];
+
+    const templates = {};
+    Object.defineProperty(templates, 'panelTemplate', {
+        value: "            <div class=\"row\" style=\"margin: auto;\">\n" +
+        "                <div class=\"col-xs-12\">\n" +
+        "                    <div class=\"panel panel-primary\" style=\"margin-bottom: 2rem;\">\n" +
+        "                        <div class=\"panel-heading\">\n" +
+        "                            <div class=\"row\">\n" +
+        "                                <div class=\"col-xs-2\">\n" +
+        "                                    <span class=\"glyphicon glyphicon-wrench\" aria-hidden=\"true\"></span><span class=\"header-vyrobene\"></span>\n" +
+        "                                    <span class=\"glyphicon glyphicon-time\" aria-hidden=\"true\" style=\"margin-left: 1rem;\"></span><span class=\"header-dobre\"></span>\n" +
+        "                                </div>\n" +
+        "                                <div class=\"col-xs-8 text-center\">\n" +
+        "                                    <strong class=\"header-nazov\"></strong><span class=\"header-zmena\" style=\"margin-left: .5rem;\"></span>\n" +
+        "                                </div>\n" +
+        "                                <div class=\"col-xs-2\">\n" +
+        "                                </div>\n" +
+        "                            </div>\n" +
+        "                        </div>\n" +
+        "                        <div class=\"panel-body\">\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>",
+        writable: false
+    });
+
+    Object.defineProperty(templates, 'stvrthodinkyTemplate', {
+        value: "            <div class=\"row\">\n" +
+        "                <div class=\"col-xs-12\">\n" +
+        "                    <div class=\"row\" style=\"margin-bottom: 0;\">\n" +
+        "                        <div class=\"col-xs-12 text-center\">\n" +
+        "                            <h4><strong>Štvrťhodinky</strong></h4>\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                    <div class=\"row\" style=\"border-bottom: 1px solid #337ab7;\">\n" +
+        "                        <div class=\"col-xs-12\">\n" +
+        "                            <div class=\"chart-container\" style=\"position: relative; height:40vh;\">\n" +
+        "                                <canvas></canvas>\n" +
+        "                            </div>\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                    <div class=\"row\" style=\"margin-bottom: 0;\">\n" +
+        "                        <div class=\"col-xs-12 text-center\">\n" +
+        "                            <h4><strong>Dopravníky</strong></h4>\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                </div>",
+        writable: false
+    });
+
+    Object.defineProperty(templates, 'dopravnikTemplate', {
+        value: "            <div class=\"row\">\n" +
+        "                <div class=\"col-xs-12 chart-container\" style=\"position: relative; height:40vh;\">\n" +
+        "                    <span class=\"infoPanel\">\n" +
+        "                        <span class=\"glyphicon glyphicon-chevron-up\" aria-hidden=\"true\"></span><span class=\"conv-maximum\"></span>\n" +
+        "                        <span class=\"infoPanelSpan\">\n" +
+        "                            <span class=\"glyphicon glyphicon-chevron-down\" aria-hidden=\"true\"></span><span class=\"conv-minimum\"></span>\n" +
+        "                        </span>\n" +
+        "                    </span>\n" +
+        "                    <canvas></canvas>\n" +
+        "                </div>\n" +
+        "            </div>",
+        writable: false
+    });
 
     Object.defineProperty(window, 'charts', {
         configurable: true,
@@ -209,30 +281,15 @@ $(document).ready(function () {
     });
 
     function createPanelHtml() {
-        let panelTemplate = document.getElementById('panelTemplate');
-        let panelDiv = $(panelTemplate.content.querySelector('div.row')).clone();
-
-        $('#mainArea').append(panelDiv);
-
-        return panelDiv;
+        return $(templates.panelTemplate).appendTo("#mainArea");
     }
 
     function createStvrtHodChartHtml(panel) {
-        let chartTemplate = document.getElementById('stvrthodChartTemplate');
-        let chartDiv = $(chartTemplate.content.querySelector('div.row')).clone();
-
-        panel.find('div.panel-body').append(chartDiv);
-
-        return chartDiv;
+        return $(templates.stvrthodinkyTemplate).appendTo(panel.find('div.panel-body'));
     }
 
     function createConvChartHtml(panel) {
-        let chartTemplate = document.getElementById('convChartTemplate');
-        let chartDiv = $(chartTemplate.content.querySelector('div.row')).clone();
-
-        panel.find('div.panel-body').append(chartDiv);
-
-        return chartDiv;
+        return $(templates.dopravnikTemplate).appendTo(panel.find('div.panel-body'));
     }
 
     function createPanelHeader(panel, headerData1, headerData2) {
