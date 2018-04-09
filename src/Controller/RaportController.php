@@ -155,6 +155,10 @@ class RaportController extends Controller
                                              $sapiaEm->getRepository(SSCQT05::class)
                                                      ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla, $linka->getIdLoc());
 
+        if (empty($data)) {
+           return new JsonResponse(['success' => true, 'dataEmpty' => true]);
+        }
+
         $resData = $this->extractStvrthodinky($start, $end, $data);
 
         $result['nazov']                = $linka->getNazov();
@@ -182,6 +186,7 @@ class RaportController extends Controller
         }
 
         $result['success'] = true;
+        $result['dataEmpty'] = false;
 
         return new JsonResponse($result);
     }

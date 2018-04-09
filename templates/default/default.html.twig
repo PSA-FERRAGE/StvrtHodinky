@@ -18,22 +18,37 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <input id="zmenaTgl" type="checkbox" data-toggle="toggle"
+                               data-on="Štvorzmenka" data-off="Trojzmenka" data-onstyle="info" data-offstyle="primary">
+                    </div>
+
                     <div class="form-group" style="margin-left: 1rem;">
                         <div class="input-group">
                             <div class="input-group-btn">
-                                <button type="button" class="zmenaBtn btn btn-default form-control" data-zmena="R">R</button>
-                                <button type="button" class="zmenaBtn btn btn-default form-control" data-zmena="P">P</button>
-                                <button type="button" class="zmenaBtn btn btn-default form-control" data-zmena="N">N</button>
+                                <button type="button" class="zmenaBtn btn btn-default form-control" data-zmena="R">R
+                                </button>
+                                <button type="button" class="zmenaBtn btn btn-default form-control" data-zmena="P">P
+                                </button>
+                                <button type="button" class="zmenaBtn btn btn-default form-control" data-zmena="N">N
+                                </button>
                             </div>
-                            <input id="datePicker" type="text" class="form-control">
+                            <input id="datePicker" type="text" class="form-control" autocomplete="off">
                         </div>
 
                     </div>
-                    <button id="analyseBtn" class="btn btn-primary disabled"><span class="glyphicon glyphicon-search"></span> Analyzovať</button>
+                    <button id="analyseBtn" class="btn btn-primary" disabled><span
+                                class="glyphicon glyphicon-search"></span> Analyzovať
+                    </button>
                 </div>
 
                 <div class="navbar-form navbar-right">
-                    <button id="exportBtn" class="btn btn-success disabled"><span class="glyphicon glyphicon-export"></span>
+                    <a class="btn btn-info" id="sablonaBtn" href="{{ asset('files/sablona_stvrthodinky.xlsm') }}"><span
+                                class="glyphicon glyphicon-save-file"></span>
+                        Stiahnuť šablónu
+                    </a>
+                    <button id="exportBtn" class="btn btn-success" disabled><span
+                                class="glyphicon glyphicon-export"></span>
                         Export
                     </button>
                 </div>
@@ -48,11 +63,80 @@
                 <div class="inner three"></div>
             </div>
         </div>
-        <div id="mainArea" class="container-fluid">
-            <div id="alert" class="alert alert-danger" role="alert" style="display: none;">
-                <strong>Pozor!</strong> <span id="alertText"></span>
+        <div id="mainArea" class="container-fluid" style="display: none;">
+        </div>
+
+        <div id="alert" style="display: none;">
+            <div style="padding: 5px;">
+                <div id="inner-alert" class="alert alert-info alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong id="alertType"></strong> <span id="alertText"></span>
+                </div>
             </div>
         </div>
+
+        <template id="panelTemplate">
+            <div class="row" style="margin: auto;">
+                <div class="col-xs-12">
+                    <div class="panel panel-primary" style="margin-bottom: 2rem;">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span><span class="header-vyrobene"></span>
+                                    <span class="glyphicon glyphicon-time" aria-hidden="true" style="margin-left: 1rem;"></span><span class="header-dobre"></span>
+                                </div>
+                                <div class="col-xs-8 text-center">
+                                    <strong class="header-nazov"></strong><span class="header-zmena" style="margin-left: .5rem;"></span>
+                                </div>
+                                <div class="col-xs-2">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="stvrthodChartTemplate">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="row" style="margin-bottom: 0;">
+                        <div class="col-xs-12 text-center">
+                            <h4><strong>Štvrťhodinky</strong></h4>
+                        </div>
+                    </div>
+                    <div class="row" style="border-bottom: 1px solid #337ab7;">
+                        <div class="col-xs-12">
+                            <div class="chart-container" style="position: relative; height:40vh;">
+                                <canvas></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom: 0;">
+                        <div class="col-xs-12 text-center">
+                            <h4><strong>Dopravníky</strong></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </template>
+
+        <template id="convChartTemplate">
+            <div class="row">
+                <div class="col-xs-12 chart-container" style="position: relative; height:40vh;">
+                    <span class="infoPanel">
+                        <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span><span class="conv-maximum"></span>
+                        <span class="infoPanelSpan">
+                            <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span><span class="conv-minimum"></span>
+                        </span>
+                    </span>
+                    <canvas></canvas>
+                </div>
+            </div>
+        </template>
     </main>
 {% endblock %}
 

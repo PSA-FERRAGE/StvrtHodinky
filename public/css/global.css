@@ -25,7 +25,8 @@ canvas {
 }
 
 #datePicker {
-    min-width: 27rem;
+    max-width: 12rem;
+    text-align: center;
 }
 
 #datePicker::-ms-clear {
@@ -36,14 +37,37 @@ canvas {
     margin-left: 1rem;
 }
 
+#alert {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 50vw;
+}
+
+#inner-alert {
+    margin: 0 auto;
+}
+
+.toggle {
+    margin-left: 1rem;
+}
+
+.panel-body > .row {
+    margin-bottom: 2rem;
+}
+
 .infoPanel {
     position: absolute;
-    left: 3rem;
+    left: 15px;
     overflow: hidden;
 }
 
 .infoPanelSpan {
     padding-left: 1rem;
+}
+
+#exportBtn, #sablonaBtn {
+    display: none;
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {

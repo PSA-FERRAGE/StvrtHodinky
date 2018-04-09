@@ -16,10 +16,11 @@ doctrine:
                 url: '%env(resolve:DATABASE_SAPIA_URL)%'
 
             fer:
-                # configure these for your database server
-                driver: 'pdo_mysql'
-                server_version: '5.7'
-                charset: utf8mb4
-                url: '%env(resolve:DATABASE_MYSQL_URL)%'
+                driver: 'sqlsrv'
+                user: 'fer_ro'
+                password: 'trnava12'
+                dbname: 'fer_stvrthodinky'
+                url: '%env(resolve:DATABASE_SQLSRV_URL)%'
+
         types:
             mydatetime: App\Type\MyDateTimeType
