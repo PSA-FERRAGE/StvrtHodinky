@@ -1,13 +1,4 @@
 $(document).ready(function () {
-    window.onbeforeprint = function() {
-        console.log('This will be called before the user prints.');
-    };
-    window.onafterprint = function() {
-        console.log('This will be called after the user prints');
-    };
-
-    var chartsArr = [];
-
     const templates = {};
     Object.defineProperty(templates, 'panelTemplate', {
         value: "            <div class=\"row\" style=\"margin: auto;\">\n" +
@@ -73,6 +64,7 @@ $(document).ready(function () {
         writable: false
     });
 
+    var chartsArr = [];
     Object.defineProperty(window, 'charts', {
         configurable: true,
 
@@ -82,11 +74,29 @@ $(document).ready(function () {
 
         set: function (val) {
             if (val.length === 0) {
-                $('#exportBtn').prop('disabled', true);
+                $('#printBtn').prop('disabled', true);
                 chartsArr = [];
             } else {
-                $('#exportBtn').prop('disabled', false);
+                $('#printBtn').prop('disabled', false);
                 chartsArr.push(val);
+            }
+
+        }
+    });
+
+    var chartsInfoArr = [];
+    Object.defineProperty(window, 'chartsInfo', {
+        configurable: true,
+
+        get: function () {
+            return chartsInfoArr;
+        },
+
+        set: function (val) {
+            if (val.length === 0) {
+                chartsInfoArr = [];
+            } else {
+                chartsInfoArr.push(val);
             }
 
         }
@@ -123,9 +133,9 @@ $(document).ready(function () {
     });
 
     $('#datePicker').on('onkeypress', function () {
-       if ($(this).val() === "") {
-           $('#analyseBtn').attr('disabled', true);
-       }
+        if ($(this).val() === "") {
+            $('#analyseBtn').attr('disabled', true);
+        }
     });
 
     $('.zmenaBtn').click(function () {
@@ -147,6 +157,7 @@ $(document).ready(function () {
         $(this).blur();
 
         window.charts = [];
+        window.chartsInfo = [];
 
         if ($('.zmenaBtn').hasClass('active') === false) {
             showAlert('Prosim zvoľte zmenu [R, P, N].', 'alert-danger');
@@ -156,12 +167,12 @@ $(document).ready(function () {
             return;
         }
 
-        let preloader   = $("#preloader");
-        let linka       = $('#linkaSelect').val();
-        let linkaText   = $("#linkaSelect option:selected").text();
+        let preloader = $("#preloader");
+        let linka = $('#linkaSelect').val();
+        let linkaText = $("#linkaSelect option:selected").text();
         let stvorzmenka = $("#zmenaTgl").prop('checked');
-        let datum       = $('#datePicker').val();
-        let nextDay     = moment(datum, 'DD/MM/YYYY').add(1, 'd').format('DD/MM/YYYY');
+        let datum = $('#datePicker').val();
+        let nextDay = moment(datum, 'DD/MM/YYYY').add(1, 'd').format('DD/MM/YYYY');
 
         preloader.show();
 
@@ -179,17 +190,17 @@ $(document).ready(function () {
             switch (zmena) {
                 case "R":
                     startTime = datum + " 06:00";
-                    endTime   = datum + (stvorzmenka ? " 18:00" : " 14:00");
+                    endTime = datum + (stvorzmenka ? " 18:00" : " 14:00");
                     zmenaString = "Ranná zmena";
                     break;
                 case "P":
                     startTime = datum + " 14:00";
-                    endTime   = (stvorzmenka ? nextDay + " 02:00" : datum + " 22:00");
+                    endTime = (stvorzmenka ? nextDay + " 02:00" : datum + " 22:00");
                     zmenaString = "Poobedná zmena";
                     break;
                 case "N":
                     startTime = datum + (stvorzmenka ? " 18:00" : " 22:00");
-                    endTime   = nextDay + " 06:00";
+                    endTime = nextDay + " 06:00";
                     zmenaString = "Nočná zmena";
                     break;
             }
@@ -216,6 +227,20 @@ $(document).ready(function () {
                 let chartDiv = createStvrtHodChartHtml(panel);
                 appendStvrthodinkyChart(stvrthodinkyData, chartDiv);
 
+                let chartCanvas = chartDiv.find('canvas');
+                chartCanvas.attr('id', [linkaText, zmena, "S"].join("_"));
+
+                let chartInfoData = {
+                    'id': chartCanvas.attr('id'),
+                    'produkcia': stvrthodinkyData.data.Production,
+                    'stvrthodinky': stvrthodinkyData.data.Stvrthodinky,
+                    'stvrthodinkyPerc': stvrthodinkyData.data.StvrthodinkyPerc,
+                    'linka': linkaText,
+                    'zmena': zmenaString,
+                    'chartImage': '',
+                    'dopravniky': []
+                };
+
                 if (dopravnikyData.success === true) {
                     dopravnikyData.Dopravniky.forEach(function (dopravnik) {
                         let chartDiv = createConvChartHtml(panel);
@@ -223,62 +248,50 @@ $(document).ready(function () {
                         chartDiv.find('.conv-maximum').text(dopravnik.Maximum);
                         chartDiv.find('.conv-minimum').text(dopravnik.Minimum);
                         appendDopravnikyChart(dopravnik, chartDiv);
+
+                        let chartCanvas = chartDiv.find('canvas');
+                        chartCanvas.attr('id', [dopravnik.nazov, zmena, "D"].join("_"));
+
+                        chartInfoData['dopravniky'].push({
+                            'id': chartCanvas.attr('id'),
+                            'nazov': dopravnik.nazov,
+                            'minimum' : dopravnik.Minimum,
+                            'maximum' : dopravnik.Maximum,
+                            'chartImage': ''
+                        });
                     });
                 }
 
-                let headerData1 = [
-                    stvrthodinkyData.data.Production,
-                    stvrthodinkyData.data.Stvrthodinky,
-                    stvrthodinkyData.data.StvrthodinkyPerc
-                ];
+                createPanelHeader(panel, chartInfoData);
 
-                let headerData2 = [
-                    linkaText,
-                    zmenaString
-                ];
+                window.chartsInfo.push(chartInfoData);
 
-                createPanelHeader(panel, headerData1, headerData2);
-            });
-        });
-
-
-    });
-
-    $('#exportBtn').click(function () {
-        if (typeof window.charts === "undefined") {
-            return;
-        }
-
-        let linka = $("#linkaSelect").val();
-        let data = {};
-
-        window.charts.forEach(function (item) {
-            let chart = item.chart;
-            let chartData = [];
-
-            chart.data.datasets[0].data.forEach(function (item, index) {
-                let tmpData = {
-                    label: chart.data.labels[index],
-                    value: item
-                };
-
-                for (i = 1; i < chart.data.datasets.length; i++) {
-                    tmpData["limit" + i] = chart.data.datasets[i].data[index];
+                if (index === (numOfZmena - 1)) {
+                    sessionStorage.setItem('panelObjects', JSON.stringify(window.chartsInfo));
                 }
-
-                chartData.push(tmpData)
             });
-
-            data[chart.options.title.text] = {
-                'type': (chart.config.type === "bar" ? "stvrthodinky" : "dopravnik"),
-                'data': chartData
-            };
         });
 
-        $.post("/export/" + linka, data, function( result ) {
-            console.log(result);
-        });
+
     });
+
+    $('#printBtn').click(function () {
+        let panels = JSON.parse(sessionStorage.getItem('panelObjects'));
+        panels.forEach(function (stvrthodinky) {
+            stvrthodinky.chartImage = document.getElementById(stvrthodinky.id).toDataURL();
+            stvrthodinky.dopravniky.forEach(function (dopravnik) {
+                dopravnik.chartImage = document.getElementById(dopravnik.id).toDataURL();
+            });
+        });
+
+        $.post("/save", {'data': panels}, function (data) {
+            let popUp = window.open('/print/' + data.cacheId, '_blank ');
+            if (popUp == null || typeof(popUp) ==='undefined') {
+                alert('Prosim povolte vyskakovacie okna pre tento odkaz.');
+            }
+        }, "json");
+    });
+
 
     function createPanelHtml() {
         return $(templates.panelTemplate).appendTo("#mainArea");
@@ -292,12 +305,12 @@ $(document).ready(function () {
         return $(templates.dopravnikTemplate).appendTo(panel.find('div.panel-body'));
     }
 
-    function createPanelHeader(panel, headerData1, headerData2) {
-        panel.find('.header-vyrobene').text(' ' + headerData1[0]);
-        panel.find('.header-dobre').text(' ' + headerData1[1] + ' - ' + headerData1[2] + '%');
+    function createPanelHeader(panel, chartInfoData) {
+        panel.find('.header-vyrobene').text(' ' + chartInfoData.produkcia);
+        panel.find('.header-dobre').text(' ' + chartInfoData.stvrthodinky + ' - ' + chartInfoData.stvrthodinkyPerc + '%');
 
-        panel.find('.header-nazov').text(headerData2[0]);
-        panel.find('.header-zmena').text('[' + headerData2[1] + ']');
+        panel.find('.header-nazov').text(chartInfoData.linka);
+        panel.find('.header-zmena').text('[' + chartInfoData.zmena + ']');
     }
 
     function appendStvrthodinkyChart(data, chartDiv) {
@@ -502,7 +515,7 @@ $(document).ready(function () {
 
         $('#inner-alert').removeClass();
         $('#inner-alert').addClass('alert alert-dismissible ' + type);
-        $("#alert").fadeTo(2000, 500).slideUp(500, function(){
+        $("#alert").fadeTo(2000, 500).slideUp(500, function () {
             $("#alert").slideUp(500);
         });
     }
