@@ -27,7 +27,6 @@ canvas {
 #datePicker {
     max-width: 12rem;
     text-align: center;
-    border-left: none;
 }
 
 #datePicker::-ms-clear {
