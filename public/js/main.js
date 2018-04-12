@@ -181,7 +181,7 @@ $(document).ready(function () {
 
         let numOfZmena = $('.zmenaBtn.active').length;
 
-        $('.zmenaBtn.active').each(function (index) {
+        $('.zmenaBtn.active').each(function () {
             let zmena = $(this).data('zmena');
             let zmenaString = "";
             let stvrthodinkyData = {}, dopravnikyData = {};
@@ -213,7 +213,9 @@ $(document).ready(function () {
                     dopravnikyData = data;
                 })
             ).then(function () {
-                if (index === (numOfZmena - 1)) {
+                numOfZmena -= 1;
+                
+                if (numOfZmena === 0) {
                     mainArea.show();
                     preloader.hide();
                 }
@@ -262,11 +264,12 @@ $(document).ready(function () {
                     });
                 }
 
+                
                 createPanelHeader(panel, chartInfoData);
 
                 window.chartsInfo.push(chartInfoData);
 
-                if (index === (numOfZmena - 1)) {
+                if (numOfZmena === 0) {
                     sessionStorage.setItem('panelObjects', JSON.stringify(window.chartsInfo));
                 }
             });
