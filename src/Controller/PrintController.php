@@ -38,6 +38,8 @@ class PrintController extends Controller
         }
 
         try {
+            usort($data, array($this, "cmp"));
+
             $cacheId = uniqid();
             $this->cache->set($cacheId, $data);
 
@@ -70,5 +72,20 @@ class PrintController extends Controller
         } catch (InvalidArgumentException $e) {
             throw new \Exception();
         }
+    }
+
+    private function cmp($a, $b)
+    {
+        if ($a['zmena'] == "Ranná zmena")
+            return -1;
+        if ($a['zmena'] == "Nočná zmena")
+            return 1;
+
+        if ($b['zmena'] == "Ranná zmena")
+            return 1;
+        if ($b['zmena'] == "Nočná zmena")
+            return -1;
+
+        return 0;
     }
 }
