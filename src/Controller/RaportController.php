@@ -9,83 +9,158 @@ use App\Entity\Sapia\SSCQT09;
 use DateInterval;
 use DatePeriod;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RaportController extends Controller
 {
     /**
-     * @Route(path="/dopravnik/{linka}", name="dopravnik_action")
-     * @Method("POST")
+     * @Route(path="/analyse/{linka}", methods={"POST"}, name="analyse_action")
      *
      * @param Request $request
      * @param Linka   $linka
      *
      * @return JsonResponse
+     * @throws \Exception
      */
-    public function getDopravnikDataAction(Request $request, Linka $linka)
+    public function analyseAction(Request $request, Linka $linka)
     {
-        $result = ['success' => false, 'msg' => ''];
-
-        $sapiaEm = $this->getDoctrine()->getManager('sapia');
-
         $params = $request->request;
-        $start  = \DateTime::createFromFormat('d/m/Y H:i', $params->get('start', null));
-        $end    = \DateTime::createFromFormat('d/m/Y H:i', $params->get('end', null));
 
-        if (!$start || !$end) {
-            $result['msg'] = 'Zle zadany datum!';
+        $trojzmenka = $params->has('stvorzmenka') ? false : true;
+        $datum      = $params->get('datum', null);
+        $zmeny      = explode(",", $params->get('zmeny', ""));
 
-            return new JsonResponse($result);
-        } else {
-            if (!$linka) {
-                $result['msg'] = 'Zle zadana linka!';
-
-                return new JsonResponse($result);
-            }
+        if ($datum == null || empty($zmeny)) {
+            return new JsonResponse([], Response::HTTP_BAD_REQUEST);
         }
 
-        $dopravniky = $linka->getDopravniky();
+        $timeIntervals = $this->getTimeIntervals($zmeny, $datum, $trojzmenka);
 
-        $result['linka']      = $linka->getNazov();
-        $result['start']      = $start;
-        $result['end']        = $end;
-        $result['Dopravniky'] = [];
-
-
-        /** @var Dopravnik $dopravnik */
-        foreach ($dopravniky as $dopravnik) {
-            $tmpRes = [
-                'nazov' => $dopravnik->getNazov(),
+        $result = [];
+        foreach ($timeIntervals as $timeInterval) {
+            $tmpResult = [
+                'linka'        => $linka->getNazov(),
+                'zmena'        => $timeInterval['zmena'],
+                'zmenaString'  => $timeInterval['zmenaString'],
+                'Stvrthodinky' => $this->getStvrthodinky($linka, $timeInterval),
+                'Dopravniky'   => $this->getDopravnikData($linka, $timeInterval),
             ];
 
-            $data = $sapiaEm->getRepository(SSCQT09::class)
-                            ->findAllConvDataBetweenDates($start, $end, $dopravnik->getNazov());
-
-            if ($data) {
-                $resVals                = $this->fillEmtpyTimeValues($start, $end, $data);
-                $tmpRes['data']         = $resVals;
-                $tmpRes['minVals']      = array_fill(0, count($resVals['values']), $dopravnik->getMinCnt());
-                $tmpRes['okVals']       = array_fill(0, count($resVals['values']), $dopravnik->getOkCnt());
-                $tmpRes['MaximumAxis']  = $dopravnik->getMax();
-                $tmpRes['Maximum']      = max($resVals['values']);
-                $tmpRes['Minimum']      = min($resVals['values']);
-                $result['Dopravniky'][] = $tmpRes;
+            if (empty($tmpResult['Stvrthodinky'])) {
+                $tmpResult['produkcia']        = 0;
+                $tmpResult['stvrthodinky']     = 0;
+                $tmpResult['stvrthodinkyPerc'] = 0;
+            } else {
+                $tmpResult['produkcia']        = array_sum($tmpResult['Stvrthodinky']['values']);
+                $tmpResult['stvrthodinky']     = array_reduce(
+                        $tmpResult['Stvrthodinky']['values'],
+                        function ($a, $b) use ($linka) {
+                            return ($b >= $linka->getLimitStvrthodinky()) ? ++$a : $a;
+                        }
+                    ) ?? 0;
+                $tmpResult['stvrthodinkyPerc'] = round(
+                    ($tmpResult['stvrthodinky'] / count($tmpResult['Stvrthodinky']['values'])) * 100,
+                    1
+                );
             }
-        }
 
-        $result['success'] = true;
+            $result[] = $tmpResult;
+        }
 
         return new JsonResponse($result);
     }
 
-    private function fillEmtpyTimeValues(\DateTime $start, \DateTime $end, array $data): array
+    /**
+     * @param array  $zmeny
+     * @param string $datum
+     * @param bool   $trojzmenka
+     *
+     * @return array
+     */
+    private function getTimeIntervals(array $zmeny, string $datum, bool $trojzmenka): array
+    {
+        return array_map(
+            function ($elem) use ($trojzmenka, $datum) {
+                $start = \DateTime::createFromFormat('d/m/Y H:i', $datum." 00:00");
+                $end   = \DateTime::createFromFormat('d/m/Y H:i', $datum." 00:00");
+
+                switch ($elem) {
+                    case "R":
+                        return [
+                            'zmena'       => $elem,
+                            'zmenaString' => "Ranná zmena",
+                            'start'       => $start->add(new DateInterval('PT6H')),
+                            'end'         => $end->add(new DateInterval(($trojzmenka ? "PT14H" : "PT18H"))),
+                        ];
+                    case "P":
+                        return [
+                            'zmena'       => $elem,
+                            'zmenaString' => "Poobedná zmena",
+                            'start'       => $start->add(new DateInterval('PT14H')),
+                            'end'         => $end->add(new DateInterval(($trojzmenka ? "PT22H" : "P1DT2H"))),
+                        ];
+                    case "N":
+                        return [
+                            'zmena'       => $elem,
+                            'zmenaString' => "Nočná zmena",
+                            'start'       => $start->add(new DateInterval(($trojzmenka ? "PT22H" : "PT18H"))),
+                            'end'         => $end->add(new DateInterval('P1DT6H')),
+                        ];
+                    default:
+                        return [];
+                }
+            },
+            $zmeny
+        );
+    }
+
+    /**
+     * @param Linka $linka
+     * @param array $timeInterval
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getDopravnikData(Linka $linka, array $timeInterval): array
+    {
+        $result = [];
+
+        $dopravniky = $linka->getDopravniky();
+        $sapiaEm    = $this->getDoctrine()->getManager('sapia');
+
+        /** @var Dopravnik $dopravnik */
+        foreach ($dopravniky as $dopravnik) {
+            $data = $sapiaEm->getRepository(SSCQT09::class)
+                            ->findAllConvDataBetweenDates(
+                                $timeInterval['start'],
+                                $timeInterval['end'],
+                                $dopravnik->getNazov()
+                            );
+
+            if ($data) {
+                $result[] = $this->computeDopravnikResult($dopravnik, $timeInterval, $data);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param Dopravnik $dopravnik
+     * @param array     $timeInterval
+     * @param array     $data
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function computeDopravnikResult(Dopravnik $dopravnik, array $timeInterval, array $data): array
     {
         $interval = new DateInterval('PT1M');
-        $tmpEnd   = clone $end;
-        $period   = new DatePeriod($start, $interval, $tmpEnd->add($interval));
+        $tmpEnd   = clone $timeInterval['end'];
+        $period   = new DatePeriod($timeInterval['start'], $interval, $tmpEnd->add($interval));
         $values   = [];
         $labels   = [];
 
@@ -114,87 +189,61 @@ class RaportController extends Controller
             $i++;
         }
 
-        return ['labels' => $labels, 'values' => $values];
+        return [
+            'nazov'       => $dopravnik->getNazov(),
+            'values'      => $values,
+            'labels'      => $labels,
+            'minVals'     => array_fill(0, count($values), $dopravnik->getMinCnt()),
+            'okVals'      => array_fill(0, count($values), $dopravnik->getOkCnt()),
+            'min'         => min($values),
+            'max'         => max($values),
+            'MaximumAxis' => $dopravnik->getMax(),
+        ];
     }
 
     /**
-     * @Route(path="/stvrthodinky/{linka}")
-     * @Method("POST")
+     * @param Linka $linka
+     * @param array $timeInterval
      *
-     * @param Request $request
-     * @param Linka   $linka
-     *
-     * @return JsonResponse
+     * @return array|null
+     * @throws \Exception
      */
-    public function getStvrthodinkyDataAction(Request $request, Linka $linka)
+    private function getStvrthodinky(Linka $linka, array $timeInterval): ?array
     {
-        $result = ['success' => false, 'msg' => ''];
+        $pocitadla    = $linka->getPocitadla();
+        $localisation = $linka->getIdLoc();
+        $sapiaEm      = $this->getDoctrine()->getManager('sapia');
 
-        $sapiaEm = $this->getDoctrine()->getManager('sapia');
-
-        $params = $request->request;
-        $start  = \DateTime::createFromFormat('d/m/Y H:i', $params->get('start', null));
-        $end    = \DateTime::createFromFormat('d/m/Y H:i', $params->get('end', null));
-
-        if (!$start || !$end) {
-            $result['msg'] = 'Zle zadany datum!';
-
-            return new JsonResponse($result);
-        } else {
-            if (!$linka) {
-                $result['msg'] = 'Zle zadana linka!';
-
-                return new JsonResponse($result);
-            }
-        }
-
-        $pocitadla = $linka->getPocitadla();
-
-        $data = $linka->getIdLoc() == null ? $sapiaEm->getRepository(SSCQT09::class)
-                                                     ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla) :
-                                             $sapiaEm->getRepository(SSCQT05::class)
-                                                     ->findAllStvrtHodDataBetweenDates($start, $end, $pocitadla, $linka->getIdLoc());
+        $data = $localisation == null
+            ? $sapiaEm->getRepository(SSCQT09::class)
+                      ->findAllStvrtHodDataBetweenDates($timeInterval['start'], $timeInterval['end'], $pocitadla)
+            : $sapiaEm->getRepository(SSCQT05::class)
+                      ->findAllStvrtHodDataBetweenDates(
+                          $timeInterval['start'],
+                          $timeInterval['end'],
+                          $pocitadla,
+                          $localisation
+                      );
 
         if (empty($data)) {
-           return new JsonResponse(['success' => true, 'dataEmpty' => true]);
+            return null;
         }
 
-        $resData = $this->extractStvrthodinky($start, $end, $data);
-
-        $result['nazov']                = $linka->getNazov();
-        $result['data']                 = $resData;
-        $result['data']['limit']        = array_fill(
-            0,
-            count($resData['values']),
-            $linka->getLimitStvrthodinky()
-        );
-        $result['data']['Maximum']      = max($resData['values']);
-        $result['data']['Production']   = array_sum($resData['values']);
-        $result['data']['Stvrthodinky'] = array_reduce(
-            $resData['values'],
-            function ($a, $b) use ($linka) {
-                return ($b >= $linka->getLimitStvrthodinky()) ? ++$a : $a;
-            }
-        );
-
-        if (!$result['data']['Stvrthodinky']) {
-            $result['data']['Stvrthodinky']     = 0;
-            $result['data']['StvrthodinkyPerc'] = 0;
-        } else {
-            $result['data']['StvrthodinkyPerc'] = $result['data']['Stvrthodinky'] / count($resData['values']);
-            $result['data']['StvrthodinkyPerc'] = round($result['data']['StvrthodinkyPerc'] * 100, 1);
-        }
-
-        $result['success'] = true;
-        $result['dataEmpty'] = false;
-
-        return new JsonResponse($result);
+        return $this->extractStvrthodinky($linka, $timeInterval, $data);
     }
 
-    private function extractStvrthodinky(\DateTime $start, \DateTime $end, array $data): array
+    /**
+     * @param Linka $linka
+     * @param array $timeInterval
+     * @param array $data
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function extractStvrthodinky(Linka $linka, array $timeInterval, array $data): array
     {
         $interval = new DateInterval('PT15M');
-        $period   = new DatePeriod($start, $interval, $end);
+        $period   = new DatePeriod($timeInterval['start'], $interval, $timeInterval['end']);
         $values   = [];
         $labels   = [];
 
@@ -220,6 +269,11 @@ class RaportController extends Controller
             $values[] = $cnt;
         }
 
-        return ['labels' => $labels, 'values' => $values];
+        return [
+            'values' => $values,
+            'labels' => $labels,
+            'limit'  => array_fill(0, count($values), $linka->getLimitStvrthodinky()),
+            'max'    => max($values),
+        ];
     }
 }

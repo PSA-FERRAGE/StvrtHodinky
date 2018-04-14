@@ -9,6 +9,7 @@
 
     <link rel="icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}"/>
 
+    <link type="text/css" rel="stylesheet" href="{{ asset('vendor/css/fontawesome-all.min.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ asset('vendor/css/bootstrap.min.css') }}">
 
     <style>
@@ -17,17 +18,6 @@
             margin-bottom: 2rem;
             padding-bottom: 1rem;
         }
-
-        .infoPanel {
-            position: absolute;
-            left: 15px;
-            overflow: hidden;
-            font-size: .75rem;
-        }
-
-        .infoPanelSpan {
-            padding-left: 1rem;
-        }
     </style>
 </head>
 <body>
@@ -35,25 +25,24 @@
     <div class="container-fluid">
         {% for item in data %}
             <div class="row">
-                <div class="col-xs-12 text-center">
+                <div class="col text-center">
                     <h5><strong>{{ item.linka }}</strong><span style="margin-left: .5rem;">{{'[' ~ item.zmena ~ '] - '}}</span>
-                    <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> {{ item.produkcia }}
-                    <span class="glyphicon glyphicon-time" aria-hidden="true"
-                          style="margin-left: 1rem;"></span> {{ item.stvrthodinky ~ ' - ' ~ item.stvrthodinkyPerc ~ '%' }}</h5>
+                    <i class="fa fa-wrench"></i> {{ item.produkcia }}
+                    <i class="fa fa-check ml-1"></i> {{ item.stvrthodinky ~ ' - ' ~ item.stvrthodinkyPerc ~ '%' }}</h5>
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 text-center">
+                <div class="col text-center">
                     <h6><strong>Štvrťhodinky</strong></h6>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <img class="img-responsive" src="{{ item.chartImage }}">
+            <div class="row mb-5">
+                <div class="col">
+                    <img class="img-fluid" src="{{ item.chartImage }}">
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 text-center">
+            <div class="row mb-3">
+                <div class="col text-center">
                     <h6><strong>Dopravníky</strong></h6>
                 </div>
             </div>
@@ -64,78 +53,28 @@
                 {% elseif loop.last %}
                     <div class="row lastDopravnik" style="page-break-after: always;">
                 {% else %}
-                    <div class="row">
+                    <div class="row mb-5">
                 {% endif %}
-                    <div class="col-xs-12">
-                        <span class="infoPanel">
-                            <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>{{ dopravnik.maximum }}
-                            <span class="infoPanelSpan">
-                                <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>{{ dopravnik.minimum }}
-                            </span>
-                        </span>
-                        <img class="img-responsive" src="{{ dopravnik.chartImage }}">
+                    <div class="col">
+                        <div class="row" style="margin-bottom: .5rem; font-size: .75rem;">
+                            <div class="col">
+                                <i class="fa fa-caret-up mr-1" ></i>{{ dopravnik.max }}
+                                <i class="fa fa-caret-down mr-1 ml-1"></i>{{ dopravnik.min }}
+                            </div>
+                            <div class="col">
+                                <strong>{{ dopravnik.nazov }}</strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <img class="img-fluid" src="{{ dopravnik.chartImage }}">
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
-
-        {#<div class="row">#}
-            {#<div class="col">#}
-                {#<div class="panel panel-primary" style="margin-bottom: 2rem;">#}
-                    {#<div class="panel-heading">#}
-                        {#<div class="row">#}
-                            {#<div class="col-xs-2">#}
-                                {#<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> {{ item.produkcia }}#}
-                                {#<span class="glyphicon glyphicon-time" aria-hidden="true"#}
-                                      {#style="margin-left: 1rem;"></span> {{ item.stvrthodinky ~ ' - ' ~ item.stvrthodinkyPerc ~ '%' }}#}
-                            {#</div>#}
-                            {#<div class="col-xs-8 text-center">#}
-                                {#<strong>{{ item.linka }}</strong><span style="margin-left: .5rem;">[{{ item.zmena }}#}
-                                    {#]</span>#}
-                            {#</div>#}
-                            {#<div class="col-xs-2">#}
-                            {#</div>#}
-                        {#</div>#}
-                    {#</div>#}
-                    {#<div class="panel-body">#}
-                        {#<div class="row">#}
-                            {#<div class="col-xs-12">#}
-                                {#<div class="row" style="margin-bottom: 0;">#}
-                                    {#<div class="col-xs-12 text-center">#}
-                                        {#<h4><strong>Štvrťhodinky</strong></h4>#}
-                                    {#</div>#}
-                                {#</div>#}
-                                {#<div class="row" style="border-bottom: 1px solid #337ab7;">#}
-                                    {#<div class="col-xs-12">#}
-                                        {#<img src="{{ item.chartImage }}">#}
-                                    {#</div>#}
-                                {#</div>#}
-                                {#<div class="row" style="margin-bottom: 0;">#}
-                                    {#<div class="col-xs-12 text-center">#}
-                                        {#<h4><strong>Dopravníky</strong></h4>#}
-                                    {#</div>#}
-                                {#</div>#}
-                            {#</div>#}
-                        {#</div>#}
-
-                        {#{% for dopravnik in item.dopravniky %}#}
-                            {#<div class="row">#}
-                                {#<div class="col-xs-12">#}
-                                    {#<span class="infoPanel">#}
-                                        {#<span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>{{ dopravnik.maximum }}#}
-                                        {#<span class="infoPanelSpan">#}
-                                            {#<span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>{{ dopravnik.minimum }}#}
-                                        {#</span>#}
-                                    {#</span>#}
-                                    {#<img src="{{ dopravnik.chartImage }}">#}
-                                {#</div>#}
-                            {#</div>#}
-                        {#{% endfor %}#}
-                    {#</div>#}
-                {#</div>#}
-            {#</div>#}
-            {% endfor %}
-
-        </div>
+        {% endfor %}
+    </div>
 </main>
 
 <script type="text/javascript" src="{{ asset('vendor/js/jquery-3.3.1.min.js') }}"></script>
