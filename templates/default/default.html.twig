@@ -13,16 +13,23 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <form id="userForm" class="form-inline">
                 <div class="form-group mr-2">
-                    <select id="linkaSelect" class="form-control" name="linka">
-                        {% for linka in linky %}
-                            <option value="{{ linka.id }}">{{ linka.nazov }}</option>
-                        {% endfor %}
-                    </select>
+
+                    <div class="dropdown">
+                        <button id="linkaSelectBtn" class="btn btn-outline-light dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-industry mr-1"></i><span id="linkaBtnText">{{ linky|first.nazov }}</span>
+                        </button>
+                        <div class="dropdown-menu linkaMenu" aria-labelledby="dropdownMenuButton">
+                            <a class="linkaSelectItem dropdown-item active" data-id="{{ linky|first.id }}">{{ linky|first.nazov }}</a>
+                            {% for linka in linky|slice(1, linky|length) %}
+                                <a class="linkaSelectItem dropdown-item" data-id="{{ linka.id }}">{{ linka.nazov }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group mr-2">
                     <input id="zmenaTgl" type="checkbox" name="stvorzmenka"
-                           data-toggle="toggle" data-on="Štvorzmenka" data-off="Trojzmenka"
+                           data-toggle="toggle" data-on="<i class='fa fa-clock mr-1'></i>Štvorzmenka" data-off="<i class='fa fa-clock mr-1'></i>Trojzmenka"
                            data-onstyle="warning" data-offstyle="info"
                     >
                 </div>

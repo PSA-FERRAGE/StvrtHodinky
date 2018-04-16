@@ -20,6 +20,10 @@ body {
     border: thin rgba(0, 0, 0, .25) solid;
 }
 
+div.toggle {
+    min-width: 4rem !important;
+}
+
 #version {
     margin-top: -1.5rem;
     color: white;
@@ -27,13 +31,23 @@ body {
     font-family: monospace;
 }
 
-#linkaSelect {
-    background: transparent;
-    color: white;
+.linkaMenu {
+    background-color: #343a40;
+    border: 1px solid black;
+    color: white !important;
 }
 
-#linkaSelect > option {
-    background-color: #343a40;
+.dropdown-item:focus,
+.dropdown-item:hover {
+    background-color: #f8f8f8;
+    color: black !important;
+    font-weight: bold;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #d2d2d2;
+    color: black !important;
 }
 
 .daterangepicker {
@@ -58,7 +72,7 @@ body {
 .form-control::-ms-input-placeholder { color: rgba(255, 255, 255, 0.7); }  /* Microsoft Edge */
 
 .form-control:focus {
-    border-color: #000000;
+    border-color: black;
     box-shadow: inset 0 0 10px 3px rgb(33, 125, 142);
 
 }
@@ -96,7 +110,7 @@ canvas {
 
 @media only screen and (max-width: 992px) {
     div.toggle {
-        min-width: 8rem !important;
+        min-width: 9rem !important;
     }
 
     div.navbar-collapse {
