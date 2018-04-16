@@ -45,6 +45,7 @@ class RaportController extends Controller
                 'linka'        => $linka->getNazov(),
                 'zmena'        => $timeInterval['zmena'],
                 'zmenaString'  => $timeInterval['zmenaString'],
+                'trojzmenka'   => $trojzmenka,
                 'Stvrthodinky' => $this->getStvrthodinky($linka, $timeInterval),
                 'Dopravniky'   => $this->getDopravnikData($linka, $timeInterval),
             ];

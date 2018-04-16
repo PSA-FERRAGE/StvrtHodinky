@@ -38,6 +38,41 @@ $(document).ready(function () {
     });
 
     const templates = {};
+    Object.defineProperty(templates, 'tableTemplate', {
+        value: '        <div class="row text-center">\n' +
+        '            <div class="col-3">\n' +
+        '                <table class="table table-sm">\n' +
+        '                    <thead>\n' +
+        '                    <tr>\n' +
+        '                        <th scope="col"></th>\n' +
+        '                        <th scope="col">Ranná</th>\n' +
+        '                        <th scope="col">Poobedná</th>\n' +
+        '                        <th scope="col">Nočná</th>\n' +
+        '                        <th scope="col">Celkovo</th>\n' +
+        '                    </tr>\n' +
+        '                    </thead>\n' +
+        '                    <tbody>\n' +
+        '                    <tr>\n' +
+        '                        <th scope="row">Počet</th>\n' +
+        '                        <td id="pocet_R">0</td>\n' +
+        '                        <td id="pocet_P">0</td>\n' +
+        '                        <td id="pocet_N">0</td>\n' +
+        '                        <td class="table-warning"><strong id="pocet_C"></strong></td>\n' +
+        '                    </tr>\n' +
+        '                    <tr>\n' +
+        '                        <th scope="row">Percento</th>\n' +
+        '                        <td id="perc_R">0.0%</td>\n' +
+        '                        <td id="perc_P">0.0%</td>\n' +
+        '                        <td id="perc_N">0.0%</td>\n' +
+        '                        <td class="table-warning"><strong id="perc_C"></strong></td>\n' +
+        '                    </tr>\n' +
+        '                    </tbody>\n' +
+        '                </table>\n' +
+        '            </div>\n' +
+        '        </div>',
+        writable: false
+    });
+
     Object.defineProperty(templates, 'panelTemplate', {
         value: '<div class="row mb-2">\n' +
         '    <div class="col-12">\n' +
@@ -232,6 +267,10 @@ $(document).ready(function () {
     });
 
     function processData(data) {
+        let table = $(templates.tableTemplate).appendTo("#mainArea");
+        let stvrthodinkySum = 0;
+        let trojzmenka = true;
+
         data.forEach(function (item) {
             let panel = createPanel(item);
 
@@ -254,8 +293,22 @@ $(document).ready(function () {
             createStvrthodinkyChart(panel, item.Stvrthodinky, chartId);
             chartInfoData['dopravniky'] = createDopravnikyCharts(panel, item.Dopravniky, item.zmena);
 
+            table.find('#pocet_' + item.zmena).text(item.stvrthodinky);
+            table.find('#perc_' + item.zmena).text(item.stvrthodinkyPerc + " %");
+
+            stvrthodinkySum += item.stvrthodinky;
+
             window.chartsInfo.push(chartInfoData);
         });
+
+        table.find('#pocet_C').text(stvrthodinkySum);
+
+        if (trojzmenka) {
+            table.find('#perc_C').text(round(stvrthodinkySum / (data.length * 32) * 100, 1) + " %");
+        } else {
+            table.find('#perc_C').text(round(stvrthodinkySum / (data.length * 48) * 100, 1) + " %");
+        }
+
     }
 
     function createPanel(data) {
@@ -483,5 +536,16 @@ $(document).ready(function () {
                 }
             }
         });
+    }
+
+    function round(number, precision) {
+        let shift = function (number, precision, reverseShift) {
+            if (reverseShift) {
+                precision = -precision;
+            }
+            let numArray = ("" + number).split("e");
+            return +(numArray[0] + "e" + (numArray[1] ? (+numArray[1] + precision) : precision));
+        };
+        return shift(Math.round(shift(number, precision, false)), precision, true);
     }
 });

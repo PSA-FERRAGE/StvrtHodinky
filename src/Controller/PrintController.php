@@ -66,7 +66,7 @@ class PrintController extends Controller
 
         try {
             $item = $this->cache->get($id);
-//            $this->cache->deleteItem($id);
+            $this->cache->deleteItem($id);
 
             return $this->render('print/print.html.twig', ['data' => $item]);
         } catch (InvalidArgumentException $e) {

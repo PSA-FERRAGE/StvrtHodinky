@@ -81,6 +81,15 @@ div.toggle {
     border-color: black;
 }
 
+.table td,
+.table th {
+    border-top: 1px solid black;
+}
+
+.table thead th {
+    border-bottom: 2px solid black;
+}
+
 .card {
     border-color: #337ab7;
 }
@@ -100,6 +109,7 @@ canvas {
 
 .panel-icons {
     position: absolute !important;
+    top: .9rem;
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
