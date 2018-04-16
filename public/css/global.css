@@ -84,10 +84,9 @@ canvas {
     height: 40vh;
 }
 
-/*#inner-alert {*/
-    /*margin: 0 auto;*/
-/*}*/
-
+.panel-icons {
+    position: absolute !important;
+}
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
     img[src$=".svg"] {
@@ -126,5 +125,9 @@ canvas {
     .chart-container {
         height: 40vh;
         width: 300vw;
+    }
+
+    .panel-icons {
+        position: static !important;
     }
 }

@@ -39,25 +39,25 @@ $(document).ready(function () {
 
     const templates = {};
     Object.defineProperty(templates, 'panelTemplate', {
-        value: '        <div class="row mb-2">\n' +
-        '            <div class="col-12">\n' +
-        '                <div class="card">\n' +
-        '                    <div class="card-header text-white" style="background-color: #337ab7">\n' +
-        '                        <div class="row align-items-center">\n' +
-        '                            <div class="col" style="font-size: smaller;">\n' +
-        '                                <i class="fas fa-car"></i><span class="header-vyrobene mr-1"></span>\n' +
-        '                                <i class="fas fa-check"></i><span class="header-dobre mr-1"></span>\n' +
-        '                            </div>\n' +
-        '                            <div class="col">\n' +
-        '                                <strong class="header-nazov"></strong>\n' +
-        '                                <span class="header-zmena ml-1"></span>\n' +
-        '                            </div>\n' +
-        '                        </div>\n' +
+        value: '<div class="row mb-2">\n' +
+        '    <div class="col-12">\n' +
+        '        <div class="card">\n' +
+        '            <div class="card-header text-white" style="background-color: #337ab7">\n' +
+        '                <div class="row align-items-center">\n' +
+        '                    <div class="panel-icons float-left ml-1 text-left" style="font-size: smaller;">\n' +
+        '                        <i class="fas fa-car"></i><span class="header-vyrobene mr-1"></span>\n' +
+        '                        <i class="fas fa-check"></i><span class="header-dobre mr-1"></span>\n' +
         '                    </div>\n' +
-        '                    <div class="card-body"></div>\n' +
+        '                    <div class="col text-center">\n' +
+        '                        <strong class="header-nazov"></strong>\n' +
+        '                        <span class="header-zmena ml-1"></span>\n' +
+        '                    </div>\n' +
         '                </div>\n' +
         '            </div>\n' +
-        '        </div>',
+        '            <div class="card-body"></div>\n' +
+        '        </div>\n' +
+        '    </div>\n' +
+        '</div>',
         writable: false
     });
 
