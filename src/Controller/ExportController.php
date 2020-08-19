@@ -3,16 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Fer\Linka;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class ExportController
+class ExportController extends AbstractController
 {
     /**
-     * @Route(path="/export/{linka}", name="export_action")
-     * @Method("POST")
+     * @Route(path="/export/{linka}", methods={"POST"}, name="export_action")
      *
      * @param Request $request
      * @param Linka   $linka

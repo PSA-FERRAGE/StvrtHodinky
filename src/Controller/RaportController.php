@@ -8,13 +8,13 @@ use App\Entity\Sapia\SSCQT05;
 use App\Entity\Sapia\SSCQT09;
 use DateInterval;
 use DatePeriod;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class RaportController extends Controller
+class RaportController extends AbstractController
 {
     /**
      * @Route(path="/analyse/{linka}", methods={"POST"}, name="analyse_action")

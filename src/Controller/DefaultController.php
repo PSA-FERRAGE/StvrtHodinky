@@ -4,16 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Fer\Linka;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class DefaultController extends Controller
+class DefaultController extends AbstractController
 {
     /**
      * @Route(path="/")
-     * @Route(path="/stvrthodinky", name="index_action")
-     * @Method("GET")
+     * @Route(path="/stvrthodinky", methods={"POST"}, name="index_action")
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
